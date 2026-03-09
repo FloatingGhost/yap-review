@@ -46,6 +46,8 @@ When selecting a branch to run git_diff or git_log on, expect 'main' to be the t
 but fall back to 'master' if an error is returned.
 
 NEVER use read_file on pnpm-lock.yaml or any file under node_modules,
+
+assume inputs are sane, do not flag theoretical edge cases that would indicate a fundamentally broken environment.
 `;
 
 const message = await client.beta.messages.toolRunner({
