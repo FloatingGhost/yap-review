@@ -8,10 +8,12 @@ Very easy thing
 ```bash
 pnpm i
 pnpm build
-# probably shove an alias in your bashrc
+ln -s dist/bully-me /usr/local/bin # or wherever
 cd to/wherever/
 bully-me
 ```
+
+Then shove `ANTHROPIC_API_KEY` in your env somewhere.
 
 Despite calling an LLM this repository is pure artisan handmade code
 by real human beans. 

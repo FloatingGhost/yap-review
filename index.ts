@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import "dotenv/config";
 import Anthropic from "@anthropic-ai/sdk";
 import { gitDiffTool, gitLogTool, readFileTool } from "./tools.js";
