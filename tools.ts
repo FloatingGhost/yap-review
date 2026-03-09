@@ -2,33 +2,30 @@ import { z } from "zod";
 import { betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
 import child_process from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 
 export const gitDiffTool = betaZodTool({
   name: "git_diff",
-  description: "Get the git diff for the current branch, using HEAD as the reference point",
+  description:
+    "Get the git diff for the current branch, using HEAD as the reference point",
   inputSchema: z.object({
     branchName: z.string(),
   }),
   run: ({ branchName }) => {
     console.log("TOOL: git_diff");
-    try {
-      const data = child_process.spawnSync("git", ["diff", `${branchName}...HEAD`]);
-      if (data.status !== 0) {
-        console.log(data.stdout.toString('utf-8'));
-        console.error(data.stderr.toString('utf-8'));
-        const signal = data.signal ?? 'None';
-        return `Running git diff returned a non-zero exit code (signal: ${signal})`;
-      }
 
-      return data.stdout.toString('utf-8');
-    } catch (err) {
-      if (err instanceof Error) {
-          console.error(err.message);
-          return `Error fetching diff: ${err.message}}`
-      } else {
-          return "An error occurred fetching the diff";
-      }
+    const data = child_process.spawnSync("git", [
+      "diff",
+      `${branchName}...HEAD`,
+    ]);
+    if (data.status !== 0) {
+      console.log(data.stdout.toString("utf-8"));
+      console.error(data.stderr.toString("utf-8"));
+      const signal = data.signal ?? "None";
+      return `Running git diff for ${branchName} did not succeed (signal: ${signal})`;
     }
+
+    return data.stdout.toString("utf-8");
   },
 });
 
@@ -57,20 +54,28 @@ export const readFileTool = betaZodTool({
     // runs only locally on the developer machine, so we don't care that
     // much if it can read externally.
     console.log(`TOOL: read_file ${opts.filePath}`);
+    const actualPath = path.resolve(process.cwd(), opts.filePath);
+    // if the path contained a bunch of `..` then it won't start with the cwd...
+    if (!actualPath.startsWith(process.cwd())) {
+      return `The path provided (${opts.filePath}) appears to traverse out of the root directory.`;
+    }
+    console.log(`Normalised to ${actualPath}`);
     try {
-      const data = fs.readFileSync(opts.filePath);
-      return data.toString();
+      // any read should be relative to the current working dir
+
+      const data = fs.readFileSync(actualPath);
+      return data.toString("utf-8");
     } catch (error) {
       console.error(error);
       if (error instanceof Error && "code" in error) {
         switch (error.code) {
           case "ENOENT":
-            return `The file ${opts.filePath} does not exist`;
+            return `The file ${actualPath} does not exist`;
           case "EISDIR":
-            return `The path ${opts.filePath} is a directory`;
+            return `The path ${actualPath} is a directory`;
           default:
             console.log(error.message);
-            return `An unexpected error occurred reading ${opts.filePath}`;
+            return `An unexpected error occurred reading ${actualPath}`;
         }
       }
       return "An unknown error occurred.";

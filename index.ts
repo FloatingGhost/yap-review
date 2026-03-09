@@ -17,7 +17,9 @@ Focus on correctness, missing edge cases, and logic errors — not style
 You have a few tools at your disposal:
 - git_diff: use this to fetch the diff against the main branch
 - git_log: Use this to get a list of commits
-- read_file: Use this to read a file from disk
+- read_file: Use this to read a file from disk. This will assume the path given is relative to the
+  current working directory.
+
 
 You should use these tools to first read pr_explanation.txt for a basic outline of the
 expected functionality, then check the diff to see what has changed in this branch.
@@ -39,7 +41,7 @@ other reviewers
 When selecting a branch to run git_diff or git_log on, expect 'main' to be the trunk branch,
 but fall back to 'master' if an error is returned.
 
-NEVER use read_file on pnpm-lock.yaml or any file under node_modules
+NEVER use read_file on pnpm-lock.yaml or any file under node_modules,
 `;
 
 const message = await client.beta.messages.toolRunner({
@@ -66,3 +68,7 @@ message.content.forEach((msg) => {
       console.log(msg);
   }
 });
+
+if (message.stop_reason === "max_tokens") {
+  console.log("Response was truncated due to max_tokens being reached");
+}
