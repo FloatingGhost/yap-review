@@ -2,6 +2,10 @@ import "dotenv/config";
 import Anthropic from "@anthropic-ai/sdk";
 import { gitDiffTool, gitLogTool, readFileTool } from "./tools.js";
 
+if (!process.env["ANTHROPIC_API_KEY"]) {
+  throw new Error("ANTHROPIC_API_KEY is not set");
+}
+
 const client = new Anthropic({
   apiKey: process.env["ANTHROPIC_API_KEY"],
 });

@@ -18,6 +18,11 @@ export const gitDiffTool = betaZodTool({
       "diff",
       `${branchName}...HEAD`,
     ]);
+
+    if (data.error) {
+      return `Failed to spawn git: ${data.error.message}`;
+    }
+
     if (data.status !== 0) {
       console.log(data.stdout.toString("utf-8"));
       console.error(data.stderr.toString("utf-8"));
@@ -56,9 +61,11 @@ export const readFileTool = betaZodTool({
     console.log(`TOOL: read_file ${opts.filePath}`);
     const actualPath = path.resolve(process.cwd(), opts.filePath);
     // if the path contained a bunch of `..` then it won't start with the cwd...
-    if (!actualPath.startsWith(process.cwd())) {
+    const relative = path.relative(process.cwd(), actualPath);
+    if (relative.startsWith("..") || path.isAbsolute(relative)) {
       return `The path provided (${opts.filePath}) appears to traverse out of the root directory.`;
     }
+
     console.log(`Normalised to ${actualPath}`);
     try {
       // any read should be relative to the current working dir
