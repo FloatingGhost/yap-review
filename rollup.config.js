@@ -1,12 +1,12 @@
 // rollup.config.js
-import typescript from '@rollup/plugin-typescript';
+import typescript from "@rollup/plugin-typescript";
 
 export default {
-  input: 'index.ts',
+  input: "index.ts",
   output: {
-    name: 'bully-me',
+    name: "bully-me",
     file: `dist/bully-me`,
-    format: 'es'
+    format: "es",
   },
-  plugins: [typescript()]
+  plugins: [typescript()],
 };
